@@ -604,7 +604,7 @@ func (c *Client) getAuthzForOrder(order orderResource) ([]authorization, error) 
 
 		go func(authzURL string) {
 			var authz authorization
-			_, err := getJSON(authzURL, &authz)
+			_, err := postAsGetJSON(c.jws, authzURL, &authz)
 			if err != nil {
 				errc <- domainError{Domain: authz.Identifier.Value, Error: err}
 				return
@@ -728,7 +728,7 @@ func (c *Client) requestCertificateForCsr(order orderResource, bundle bool, csr 
 		case <-stopTimer.C:
 			return nil, errors.New("certificate polling timed out")
 		case <-retryTick.C:
-			_, err := getJSON(order.URL, &retOrder)
+			_, err := postAsGetJSON(c.jws, order.URL, &retOrder)
 			if err != nil {
 				return nil, err
 			}
@@ -882,7 +882,7 @@ func validate(j *jws, domain, uri string, c challenge) error {
 		}
 		time.Sleep(time.Duration(ra) * time.Second)
 
-		hdr, err = getJSON(uri, &chlng)
+		hdr, err = postAsGetJSON(j, uri, &chlng)
 		if err != nil {
 			return err
 		}

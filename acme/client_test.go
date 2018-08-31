@@ -158,11 +158,6 @@ func TestValidate(t *testing.T) {
 			statuses = statuses[1:]
 			writeJSONResponse(w, &challenge{Type: "http-01", Status: st, URL: "http://example.com/", Token: "token"})
 
-		case http.MethodGet:
-			st := statuses[0]
-			statuses = statuses[1:]
-			writeJSONResponse(w, &challenge{Type: "http-01", Status: st, URL: "http://example.com/", Token: "token"})
-
 		default:
 			http.Error(w, r.Method, http.StatusMethodNotAllowed)
 		}
