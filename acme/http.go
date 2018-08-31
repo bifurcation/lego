@@ -147,7 +147,7 @@ func getJSON(uri string, respBody interface{}) (http.Header, error) {
 // postAsGetJSON performs an HTTP POST-as-GET request and parses the
 // response body as JSON, into the provided respBody object.
 func postAsGetJSON(j *jws, uri string, respBody interface{}) (http.Header, error) {
-	return postData(j, uri, nil, respBody)
+	return postData(j, uri, []byte{}, respBody)
 }
 
 // postJSON performs an HTTP POST request with a given JSON payload
