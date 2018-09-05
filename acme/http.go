@@ -147,7 +147,7 @@ func getJSON(uri string, respBody interface{}) (http.Header, error) {
 // postAsGetJSON performs an HTTP POST-as-GET request and parses the
 // response body as JSON, into the provided respBody object.
 func postAsGetJSON(j *jws, uri string, respBody interface{}) (http.Header, error) {
-	return postData(j, uri, []byte{}, respBody)
+	return postData(j, uri, []byte("{}"), true, respBody)
 }
 
 // postJSON performs an HTTP POST request with a given JSON payload
@@ -159,14 +159,14 @@ func postJSON(j *jws, uri string, reqBody, respBody interface{}) (http.Header, e
 		return nil, errors.New("Failed to marshal network message")
 	}
 
-	return postData(j, uri, jsonBytes, respBody)
+	return postData(j, uri, jsonBytes, false, respBody)
 }
 
 // postData performs an HTTP POST request with a given byte array as
 // payload and parses the response body as JSON, into the provided
 // respBody object.
-func postData(j *jws, uri string, data []byte, respBody interface{}) (http.Header, error) {
-	resp, err := j.post(uri, data)
+func postData(j *jws, uri string, data []byte, get bool, respBody interface{}) (http.Header, error) {
+	resp, err := j.post(uri, data, get)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to post JWS message. -> %v", err)
 	}
@@ -183,7 +183,7 @@ func postData(j *jws, uri string, data []byte, respBody interface{}) (http.Heade
 
 			// Retry once if the nonce was invalidated
 
-			retryResp, err := j.post(uri, data)
+			retryResp, err := j.post(uri, data, get)
 			if err != nil {
 				return nil, fmt.Errorf("Failed to post JWS message. -> %v", err)
 			}
