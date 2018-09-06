@@ -20,13 +20,11 @@ type jws struct {
 	nonces      nonceManager
 }
 
-const getURN = "urn:ietf:params:acme:get"
-
 // Posts a JWS signed message to the specified URL.
 // It does NOT close the response body, so the caller must
 // do that if no error was returned.
-func (j *jws) post(url string, content []byte, get bool) (*http.Response, error) {
-	signedContent, err := j.signContent(url, content, get)
+func (j *jws) post(url string, content []byte) (*http.Response, error) {
+	signedContent, err := j.signContent(url, content)
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign content -> %s", err.Error())
 	}
@@ -45,7 +43,7 @@ func (j *jws) post(url string, content []byte, get bool) (*http.Response, error)
 	return resp, nil
 }
 
-func (j *jws) signContent(url string, content []byte, get bool) (*jose.JSONWebSignature, error) {
+func (j *jws) signContent(url string, content []byte) (*jose.JSONWebSignature, error) {
 
 	var alg jose.SignatureAlgorithm
 	switch k := j.privKey.(type) {
@@ -75,9 +73,6 @@ func (j *jws) signContent(url string, content []byte, get bool) (*jose.JSONWebSi
 	options.ExtraHeaders["url"] = url
 	if j.kid == "" {
 		options.EmbedJWK = true
-	}
-	if get {
-		options.ExtraHeaders[getURN] = true
 	}
 
 	signer, err := jose.NewSigner(signKey, &options)
