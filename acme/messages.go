@@ -70,7 +70,7 @@ type challenge struct {
 	Status           string      `json:"status"`
 	Token            string      `json:"token"`
 	Validated        time.Time   `json:"validated"`
-	KeyAuthorization string      `json:"keyAuthorization"`
+	KeyAuthorization string      `json:"keyAuthorization,omitempty"`
 	Error            RemoteError `json:"error"`
 }
 

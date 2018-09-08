@@ -34,8 +34,9 @@ var (
 			ResponseHeaderTimeout: 15 * time.Second,
 			ExpectContinueTimeout: 1 * time.Second,
 			TLSClientConfig: &tls.Config{
-				ServerName: os.Getenv(caServerNameEnvVar),
-				RootCAs:    initCertPool(),
+				InsecureSkipVerify: true,
+				ServerName:         os.Getenv(caServerNameEnvVar),
+				RootCAs:            initCertPool(),
 			},
 		},
 	}
@@ -143,15 +144,29 @@ func getJSON(uri string, respBody interface{}) (http.Header, error) {
 	return resp.Header, json.NewDecoder(resp.Body).Decode(respBody)
 }
 
-// postJSON performs an HTTP POST request and parses the response body
-// as JSON, into the provided respBody object.
+// postAsGetJSON performs an HTTP POST-as-GET request and parses the
+// response body as JSON, into the provided respBody object.
+func postAsGetJSON(j *jws, uri string, respBody interface{}) (http.Header, error) {
+	return postData(j, uri, []byte{}, respBody)
+}
+
+// postJSON performs an HTTP POST request with a given JSON payload
+// and parses the response body as JSON, into the provided respBody
+// object.
 func postJSON(j *jws, uri string, reqBody, respBody interface{}) (http.Header, error) {
 	jsonBytes, err := json.Marshal(reqBody)
 	if err != nil {
 		return nil, errors.New("Failed to marshal network message")
 	}
 
-	resp, err := j.post(uri, jsonBytes)
+	return postData(j, uri, jsonBytes, respBody)
+}
+
+// postData performs an HTTP POST request with a given byte array as
+// payload and parses the response body as JSON, into the provided
+// respBody object.
+func postData(j *jws, uri string, data []byte, respBody interface{}) (http.Header, error) {
+	resp, err := j.post(uri, data)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to post JWS message. -> %v", err)
 	}
@@ -168,7 +183,7 @@ func postJSON(j *jws, uri string, reqBody, respBody interface{}) (http.Header, e
 
 			// Retry once if the nonce was invalidated
 
-			retryResp, err := j.post(uri, jsonBytes)
+			retryResp, err := j.post(uri, data)
 			if err != nil {
 				return nil, fmt.Errorf("Failed to post JWS message. -> %v", err)
 			}

@@ -38,5 +38,5 @@ func (s *httpChallenge) Solve(chlng challenge, domain string) error {
 		}
 	}()
 
-	return s.validate(s.jws, domain, chlng.URL, challenge{Type: chlng.Type, Token: chlng.Token, KeyAuthorization: keyAuth})
+	return s.validate(s.jws, domain, chlng.URL, challenge{Type: chlng.Type, Token: chlng.Token})
 }
